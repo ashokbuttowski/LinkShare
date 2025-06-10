@@ -116,6 +116,65 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         )
     return User(**user)
 
+# Metadata extraction functions
+async def extract_metadata_from_url(url: str) -> LinkMetadata:
+    """Extract metadata from a URL using server-side scraping"""
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, timeout=10) as response:
+                if response.status != 200:
+                    return LinkMetadata()
+                
+                html = await response.text()
+                soup = BeautifulSoup(html, 'html.parser')
+                
+                # Extract title
+                title = None
+                og_title = soup.find('meta', property='og:title')
+                if og_title and og_title.get('content'):
+                    title = og_title['content']
+                elif soup.title:
+                    title = soup.title.string
+                
+                # Extract description
+                description = None
+                og_desc = soup.find('meta', property='og:description')
+                if og_desc and og_desc.get('content'):
+                    description = og_desc['content']
+                else:
+                    meta_desc = soup.find('meta', attrs={'name': 'description'})
+                    if meta_desc and meta_desc.get('content'):
+                        description = meta_desc['content']
+                
+                # Extract image
+                image_url = None
+                og_image = soup.find('meta', property='og:image')
+                if og_image and og_image.get('content'):
+                    image_url = og_image['content']
+                else:
+                    twitter_image = soup.find('meta', attrs={'name': 'twitter:image'})
+                    if twitter_image and twitter_image.get('content'):
+                        image_url = twitter_image['content']
+                
+                # Make sure image URL is absolute
+                if image_url and not image_url.startswith('http'):
+                    from urllib.parse import urljoin
+                    image_url = urljoin(url, image_url)
+                
+                return LinkMetadata(
+                    title=title[:200] if title else None,  # Limit title length
+                    description=description[:500] if description else None,  # Limit description length
+                    image_url=image_url
+                )
+    
+    except Exception as e:
+        logger.warning(f"Failed to extract metadata from {url}: {str(e)}")
+        return LinkMetadata()
+
 # Authentication Routes
 @api_router.post("/auth/register", response_model=Token)
 async def register_user(user_data: UserCreate):
