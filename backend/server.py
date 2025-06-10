@@ -74,6 +74,11 @@ class Link(BaseModel):
     image_url: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+class LinkMetadata(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+
 # Utility functions
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
