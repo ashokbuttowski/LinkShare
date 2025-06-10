@@ -18,6 +18,15 @@ def random_password():
     """Generate a random password for testing"""
     return "TestPassword123!"  # Using a fixed password for consistency
 
+# Test URLs for metadata extraction
+TEST_URLS = {
+    "github": "https://github.com",
+    "stackoverflow": "https://stackoverflow.com",
+    "example": "https://example.com",
+    "httpbin": "https://httpbin.org/html",
+    "nonexistent": "https://nonexistent-domain-for-testing-123456.com"
+}
+
 class LinkShareAPITest(unittest.TestCase):
     """Test suite for LinkShare API"""
     
