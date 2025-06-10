@@ -59,10 +59,12 @@ class LinkShareAPITest(unittest.TestCase):
         # Try to register again with the same email
         response = requests.post(f"{BASE_URL}/auth/register", json=data)
         
-        # NOTE: The API returns 200 for duplicate emails, which is a bug
-        # For now, we'll adjust our test to match the actual behavior
-        self.assertEqual(response.status_code, 200)
-        print("⚠️ Duplicate email registration returns 200 (potential bug)")
+        # The API should return 400 for duplicate emails
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertIn("detail", data)
+        self.assertEqual(data["detail"], "Email already registered")
+        print("✅ Duplicate email registration properly rejected")
     
     def test_04_login_user(self):
         """Test user login"""
