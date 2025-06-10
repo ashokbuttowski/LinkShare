@@ -283,6 +283,124 @@ class LinkShareAPITest(unittest.TestCase):
         self.assertEqual(response.status_code, 403)
         
         print("✅ Protected routes properly reject requests without token")
+    
+    def test_14_extract_metadata_endpoint(self):
+        """Test the metadata extraction endpoint with various URLs"""
+        # First ensure we have a valid token
+        if not self.token:
+            self.test_04_login_user()
+        
+        headers = {"Authorization": f"Bearer {self.token}"}
+        
+        # Test with GitHub (should have good metadata)
+        response = requests.post(
+            f"{BASE_URL}/links/extract-metadata", 
+            json={"url": TEST_URLS["github"]}, 
+            headers=headers
+        )
+        self.assertEqual(response.status_code, 200)
+        github_data = response.json()
+        print(f"GitHub metadata: {json.dumps(github_data, indent=2)}")
+        self.assertIsNotNone(github_data["title"])
+        self.assertIsNotNone(github_data["description"])
+        
+        # Test with Stack Overflow (should have good metadata)
+        response = requests.post(
+            f"{BASE_URL}/links/extract-metadata", 
+            json={"url": TEST_URLS["stackoverflow"]}, 
+            headers=headers
+        )
+        self.assertEqual(response.status_code, 200)
+        stackoverflow_data = response.json()
+        print(f"Stack Overflow metadata: {json.dumps(stackoverflow_data, indent=2)}")
+        self.assertIsNotNone(stackoverflow_data["title"])
+        
+        # Test with example.com (minimal metadata)
+        response = requests.post(
+            f"{BASE_URL}/links/extract-metadata", 
+            json={"url": TEST_URLS["example"]}, 
+            headers=headers
+        )
+        self.assertEqual(response.status_code, 200)
+        example_data = response.json()
+        print(f"Example.com metadata: {json.dumps(example_data, indent=2)}")
+        self.assertIsNotNone(example_data["title"])
+        
+        # Test with httpbin (test HTML page)
+        response = requests.post(
+            f"{BASE_URL}/links/extract-metadata", 
+            json={"url": TEST_URLS["httpbin"]}, 
+            headers=headers
+        )
+        self.assertEqual(response.status_code, 200)
+        httpbin_data = response.json()
+        print(f"Httpbin metadata: {json.dumps(httpbin_data, indent=2)}")
+        
+        # Test with non-existent URL (should handle gracefully)
+        response = requests.post(
+            f"{BASE_URL}/links/extract-metadata", 
+            json={"url": TEST_URLS["nonexistent"]}, 
+            headers=headers
+        )
+        self.assertEqual(response.status_code, 200)
+        nonexistent_data = response.json()
+        print(f"Non-existent URL metadata: {json.dumps(nonexistent_data, indent=2)}")
+        
+        print("✅ Metadata extraction endpoint tested with various URLs")
+    
+    def test_15_create_link_with_auto_extraction(self):
+        """Test creating a link with automatic metadata extraction"""
+        # First ensure we have a valid token
+        if not self.token:
+            self.test_04_login_user()
+        
+        # Create a link with only URL (should trigger auto-extraction)
+        link_data = {
+            "url": TEST_URLS["github"]
+        }
+        
+        headers = {"Authorization": f"Bearer {self.token}"}
+        response = requests.post(f"{BASE_URL}/links", json=link_data, headers=headers)
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        print(f"Auto-extracted link data: {json.dumps(data, indent=2)}")
+        
+        self.assertEqual(data["url"], link_data["url"])
+        self.assertIsNotNone(data["title"])
+        self.assertIsNotNone(data["description"])
+        self.assertIn("id", data)
+        
+        # Save link ID for later tests
+        self.test_links.append(data["id"])
+        print("✅ Link creation with auto-extraction successful")
+    
+    def test_16_create_link_with_partial_metadata(self):
+        """Test creating a link with partial metadata"""
+        # First ensure we have a valid token
+        if not self.token:
+            self.test_04_login_user()
+        
+        # Create a link with partial metadata
+        link_data = {
+            "url": TEST_URLS["stackoverflow"],
+            "title": "Custom Stack Overflow Title"
+        }
+        
+        headers = {"Authorization": f"Bearer {self.token}"}
+        response = requests.post(f"{BASE_URL}/links", json=link_data, headers=headers)
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        print(f"Partial metadata link data: {json.dumps(data, indent=2)}")
+        
+        self.assertEqual(data["url"], link_data["url"])
+        self.assertEqual(data["title"], link_data["title"])  # Should use provided title
+        self.assertIn("id", data)
+        
+        # Save link ID for later tests
+        self.test_links.append(data["id"])
+        print("✅ Link creation with partial metadata successful")
 
 def run_tests():
     """Run all tests in order"""
