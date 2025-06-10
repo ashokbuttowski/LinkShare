@@ -218,8 +218,28 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
     return current_user
 
 # Link Routes
+@api_router.post("/links/extract-metadata", response_model=LinkMetadata)
+async def extract_link_metadata(url_data: dict, current_user: User = Depends(get_current_user)):
+    """Extract metadata from a URL"""
+    url = url_data.get('url')
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is required")
+    
+    metadata = await extract_metadata_from_url(url)
+    return metadata
+
 @api_router.post("/links", response_model=Link)
 async def create_link(link_data: LinkCreate, current_user: User = Depends(get_current_user)):
+    # If metadata is not provided, try to extract it
+    if not link_data.title and not link_data.description and not link_data.image_url:
+        try:
+            metadata = await extract_metadata_from_url(link_data.url)
+            link_data.title = metadata.title
+            link_data.description = metadata.description
+            link_data.image_url = metadata.image_url
+        except Exception as e:
+            logger.warning(f"Failed to extract metadata during link creation: {str(e)}")
+    
     link = Link(
         user_id=current_user.id,
         url=link_data.url,
