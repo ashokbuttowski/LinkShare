@@ -180,30 +180,45 @@ const AddLinkForm = ({ onAdd }) => {
   const extractMetadata = async (url) => {
     setExtracting(true);
     try {
-      // Client-side metadata extraction using a simple approach
-      const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-      const data = await response.json();
-      const html = data.contents;
+      // Try server-side extraction first (more reliable)
+      const response = await axios.post(`${API}/links/extract-metadata`, { url }, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
       
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      
-      const title = doc.querySelector('meta[property="og:title"]')?.content ||
-                   doc.querySelector('title')?.textContent ||
-                   'Untitled';
-      
-      const description = doc.querySelector('meta[property="og:description"]')?.content ||
-                         doc.querySelector('meta[name="description"]')?.content ||
-                         '';
-      
-      const image = doc.querySelector('meta[property="og:image"]')?.content ||
-                   doc.querySelector('meta[name="twitter:image"]')?.content ||
-                   '';
-      
-      return { title, description, image_url: image };
+      return {
+        title: response.data.title || '',
+        description: response.data.description || '',
+        image_url: response.data.image_url || ''
+      };
     } catch (error) {
-      console.log('Metadata extraction failed, will use URL only');
-      return { title: '', description: '', image_url: '' };
+      console.log('Server-side metadata extraction failed, trying client-side fallback');
+      
+      try {
+        // Fallback to client-side extraction
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+        const data = await response.json();
+        const html = data.contents;
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        const title = doc.querySelector('meta[property="og:title"]')?.content ||
+                     doc.querySelector('title')?.textContent ||
+                     '';
+        
+        const description = doc.querySelector('meta[property="og:description"]')?.content ||
+                           doc.querySelector('meta[name="description"]')?.content ||
+                           '';
+        
+        const image = doc.querySelector('meta[property="og:image"]')?.content ||
+                     doc.querySelector('meta[name="twitter:image"]')?.content ||
+                     '';
+        
+        return { title, description, image_url: image };
+      } catch (clientError) {
+        console.log('Client-side metadata extraction also failed, using URL only');
+        return { title: '', description: '', image_url: '' };
+      }
     } finally {
       setExtracting(false);
     }
