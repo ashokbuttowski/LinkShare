@@ -13,6 +13,11 @@ from datetime import datetime, timedelta
 import bcrypt
 import jwt
 from jwt.exceptions import InvalidTokenError
+import requests
+import re
+from bs4 import BeautifulSoup
+import asyncio
+import aiohttp
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
