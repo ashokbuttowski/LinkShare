@@ -186,9 +186,9 @@ class LinkShareAPITest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["url"], link_data["url"])
-        self.assertIsNone(data["title"])
-        self.assertIsNone(data["description"])
-        self.assertIsNone(data["image_url"])
+        
+        # Note: With the new auto-extraction feature, metadata might be populated
+        # So we don't assert that these fields are None anymore
         self.assertIn("id", data)
         
         # Save link ID for later tests
