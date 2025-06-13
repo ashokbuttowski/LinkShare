@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Signup</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Test Signup</h1>
+    <form id="signupForm">
+        <div>
+            <label>Email:</label>
+            <input type="email" id="email" value="test@example.com" required>
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" id="password" value="testpassword123" required>
+        </div>
+        <button type="submit">Sign Up</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        const BACKEND_URL = 'https://3ab3ee47-2d6b-4a12-bd71-9b461394abd1.preview.emergentagent.com';
+        const API = `${BACKEND_URL}/api`;
+        
+        console.log('BACKEND_URL:', BACKEND_URL);
+        console.log('API:', API);
+        
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                console.log('Making request to:', `${API}/auth/register`);
+                console.log('Data:', { email, password: '***' });
+                
+                const response = await axios.post(`${API}/auth/register`, {
+                    email: email,
+                    password: password
+                });
+                
+                console.log('Response:', response);
+                resultDiv.innerHTML = `<p style="color: green;">Success! Token: ${response.data.access_token.substring(0, 20)}...</p>`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.response?.data?.detail || error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
