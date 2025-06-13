@@ -14,12 +14,6 @@ const getToken = () => localStorage.getItem('authToken');
 const setToken = (token) => localStorage.setItem('authToken', token);
 const removeToken = () => localStorage.removeItem('authToken');
 
-const axiosConfig = {
-  headers: {
-    'Authorization': `Bearer ${getToken()}`
-  }
-};
-
 // Components
 const LoginForm = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
