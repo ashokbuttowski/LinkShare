@@ -43,7 +43,19 @@ const LoginForm = ({ onLogin }) => {
       console.error('Authentication error:', err);
       console.error('Error response:', err.response);
       console.error('Error message:', err.message);
-      setError(err.response?.data?.detail || 'Authentication failed');
+      console.error('Error status:', err.response?.status);
+      console.error('Error data:', err.response?.data);
+      
+      let errorMessage = 'Authentication failed';
+      if (err.response?.data?.detail) {
+        errorMessage = err.response.data.detail;
+      } else if (err.response?.status) {
+        errorMessage = `Server error: ${err.response.status}`;
+      } else if (err.message) {
+        errorMessage = `Network error: ${err.message}`;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
