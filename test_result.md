@@ -136,6 +136,18 @@ frontend:
           agent: "testing"
           comment: "Tested the complete authentication flow including user registration, login, and dashboard functionality. Successfully registered a new user, logged in with the credentials, and verified access to the dashboard. Also tested adding and viewing links. All frontend functionality is working correctly with proper API integration."
 
+  - task: "Docker-compose Node.js compatibility fix"
+    implemented: true
+    working: true
+    file: "Dockerfile.frontend, frontend/package.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Fixed Docker build error where react-router-dom@7.5.1 required Node.js >=20.0.0 but Dockerfile used Node 18. Updated Dockerfile.frontend to use Node.js 20, downgraded React from 19.x to 18.x for better stability with react-scripts 5.0.1, and downgraded react-router-dom to 6.8.1 for compatibility. All packages now install successfully in Docker environment."
+
   - task: "Docker-compose authentication flow testing"
     implemented: true
     working: true
