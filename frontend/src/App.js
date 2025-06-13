@@ -5,6 +5,10 @@ import axios from "axios";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Debug logging
+console.log('BACKEND_URL:', BACKEND_URL);
+console.log('API base:', API);
+
 // Token management
 const getToken = () => localStorage.getItem('authToken');
 const setToken = (token) => localStorage.setItem('authToken', token);
