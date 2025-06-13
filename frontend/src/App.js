@@ -35,10 +35,20 @@ const LoginForm = ({ onLogin }) => {
 
     try {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
-      const response = await axios.post(`${API}${endpoint}`, { email, password });
+      const fullUrl = `${API}${endpoint}`;
+      console.log('Attempting request to:', fullUrl);
+      console.log('Request data:', { email, password: '***' });
+      
+      const response = await axios.post(fullUrl, { email, password });
+      console.log('Response status:', response.status);
+      console.log('Response data:', response.data);
+      
       setToken(response.data.access_token);
       onLogin();
     } catch (err) {
+      console.error('Authentication error:', err);
+      console.error('Error response:', err.response);
+      console.error('Error message:', err.message);
       setError(err.response?.data?.detail || 'Authentication failed');
     } finally {
       setLoading(false);
