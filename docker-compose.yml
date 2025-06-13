@@ -23,12 +23,14 @@ services:
     environment:
       - MONGO_URL=mongodb://mongodb:27017
       - DB_NAME=linkshare_db
+      - JWT_SECRET=your-super-secure-jwt-secret-key-change-in-production
     depends_on:
       - mongodb
     volumes:
       - ./backend:/app
     networks:
       - linkshare-network
+    restart: unless-stopped
 
   frontend:
     build:
@@ -39,6 +41,7 @@ services:
       - "10001:3000"
     environment:
       - REACT_APP_BACKEND_URL=http://localhost:10002
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
     volumes:
@@ -46,6 +49,7 @@ services:
       - /app/node_modules
     networks:
       - linkshare-network
+    restart: unless-stopped
 
 volumes:
   mongodb_data:
