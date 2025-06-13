@@ -86,7 +86,11 @@ const LoginForm = ({ onLogin }) => {
 
           {error && (
             <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
-              {error}
+              <div className="font-semibold">Authentication Error:</div>
+              <div>{error}</div>
+              <div className="text-xs mt-2 text-gray-600">
+                Check browser console for more details.
+              </div>
             </div>
           )}
 
