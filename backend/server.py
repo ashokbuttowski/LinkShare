@@ -274,11 +274,12 @@ async def health_check():
 # Include the router in the main app
 app.include_router(api_router)
 
+# CORS middleware MUST be added AFTER including routers
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=["http://localhost:10001", "http://localhost:3000", "*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
