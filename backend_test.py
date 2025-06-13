@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 
 # Use the public endpoint from the frontend .env file
-BASE_URL = "https://dbb99f8e-72a7-4ceb-ab72-dd0468a04c6c.preview.emergentagent.com/api"
+BASE_URL = "https://3ab3ee47-2d6b-4a12-bd71-9b461394abd1.preview.emergentagent.com/api"
 
 def random_email():
     """Generate a random email for testing"""
